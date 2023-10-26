@@ -55,8 +55,11 @@ function renderMap(omap, path) {
       if (nmap[row][col] === "e") {
         nmap[row][col] = "end"
       }
-      if (nmap[row][col] != "s" & nmap[row][col] != "e" & nmap[row][col] != " "){
+      if (nmap[row][col] != "start" & nmap[row][col] != "end" & nmap[row][col] != " "){
         nmap[row][col] = "active"
+      }
+      if (nmap[row][col] === " ") {
+        nmap[row][col] = "empty"
       }
     }
   }
@@ -122,7 +125,8 @@ app.post('/solve', (req, res) => {
   }, [])
 
   var path = findpath(grid)
-  return renderMap(grid, path)
+  var map = renderMap(grid, path)
+  res.send(map)
 })
 
 app.use(express.static('public'))

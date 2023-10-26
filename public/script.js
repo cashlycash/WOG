@@ -50,6 +50,7 @@ function setEnd() {
 function clearBoard() {
   for (div of document.getElementsByTagName("div")) {
     div.classList.remove("active")
+    div.classList.remove("rasta")
     div.classList.remove("start")
     div.classList.remove("end")
   }
@@ -78,6 +79,7 @@ async function solve() {
       grid.push(" ")
     }
   }
+  console.log(grid)
   var path = await (await fetch("/solve", {
     method: "POST",
     headers: {
@@ -87,14 +89,23 @@ async function solve() {
       grid: grid
     })
   })).json()
+  console.log(path)
   if (path.length == 0) {
     alert("No path found")
   } else {
-    for (div of document.getElementsByTagName("div")) {
-      div.classList.remove("path")
-    }
-    for (id of path) {
-      document.getElementById(id).classList.add("path")
+    var fin = []
+    path.forEach((ary) => {
+      ary.forEach(element => {
+        fin.push(element)
+      });
+    });
+    for (i = 0; i < fin.length; i++) {
+      var div = document.getElementsByTagName("div")[i]
+      div.classList.remove("rasta")
+      div.classList.remove("active")
+      div.classList.remove("start")
+      div.classList.remove("end")
+      div.classList.toggle(fin[i])
     }
   }
 }
