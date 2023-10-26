@@ -98,6 +98,14 @@ function renderMap(omap, path) {
   return nmap;
 }
 
+app.get("/resources", (req, res) => {
+  if (req.signedCookies.user == undefined) {
+    res.redirect('/login')
+    return;
+  }
+  res.sendFile(__dirname + '/public/resourcelist.html')
+})
+
 app.post('/solve', (req, res) => {
   if (req.signedCookies.user == undefined) {
     res.redirect('/login')
