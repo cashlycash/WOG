@@ -1,0 +1,100 @@
+var mouseDown = false;
+document.body.onmousedown = function() { 
+  mouseDown = true
+}
+document.body.onmouseup = function() {
+  mouseDown = false
+}
+
+for (div of document.getElementsByTagName("div")) {
+  div.addEventListener("mouseover", function (e) {
+    if (mouseDown) {
+      handleClick(e)
+    }
+  });
+  div.addEventListener("click", function (e) {
+    handleClick(e)
+  });
+}
+
+var mode = "obsticles"
+
+function handleClick(e) {
+  if (mode == "obsticles") {
+    e.target.classList.toggle("active")
+  } else if (mode == "start") {
+    for (div of document.getElementsByTagName("div")) {
+      div.classList.remove("start")
+    }
+    e.target.classList.toggle("start")
+    mode = "obsticles"
+  } else if (mode == "end") {
+    for (div of document.getElementsByTagName("div")) {
+      div.classList.remove("end")
+    }
+    e.target.classList.toggle("end")
+    mode = "obsticles"
+  }
+}
+
+function setStart() {
+  alert("Click on a square to set it as the start")
+  mode = "start"
+}
+
+function setEnd() {
+  alert("Click on a square to set it as the end")
+  mode = "end"
+}
+
+function clearBoard() {
+  for (div of document.getElementsByTagName("div")) {
+    div.classList.remove("active")
+    div.classList.remove("start")
+    div.classList.remove("end")
+  }
+}
+
+async function solve() {
+  var start = document.getElementsByClassName("start")[0]
+  var end = document.getElementsByClassName("end")[0]
+  if (start == undefined) {
+    alert("No start point set")
+    return
+  }
+  if (end == undefined) {
+    alert("No end point set")
+    return
+  }
+  var grid = []
+  for (div of document.getElementsByTagName("div")) {
+    if (div.classList.contains("active")) {
+      grid.push("1")
+    } else if (div.classList.contains("start")) {
+      grid.push("s")
+    } else if (div.classList.contains("end")) {
+      grid.push("e")
+    }else {
+      grid.push(" ")
+    }
+  }
+  var path = await (await fetch("/solve", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      grid: grid
+    })
+  })).json()
+  if (path.length == 0) {
+    alert("No path found")
+  } else {
+    for (div of document.getElementsByTagName("div")) {
+      div.classList.remove("path")
+    }
+    for (id of path) {
+      document.getElementById(id).classList.add("path")
+    }
+  }
+}
