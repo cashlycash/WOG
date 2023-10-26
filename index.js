@@ -17,14 +17,14 @@ app.post('/login', (req, res) => {
   if (req.signedCookies.user) return res.redirect('/')
   var username = req.body.username
   var password = req.body.password
-  console.log('username: ' + username)
-  console.log('password: ' + password)
+  // console.log('username: ' + username)
+  // console.log('password: ' + password)
   if (username == 'admin' && password == 'password') {
     res.cookie('user', 'admin', { signed: true })
-    console.log('cookie created successfully')
+    // console.log('cookie created successfully')
     res.redirect('/')
   } else {
-    console.log('incorrect username or password')
+    // console.log('incorrect username or password')
     res.redirect('/login')
   }
 })
@@ -113,9 +113,8 @@ app.post('/solve', (req, res) => {
     return result
   }, [])
 
-  var map = findpath(grid)
-
-  return renderMap
+  var path = findpath(grid)
+  return renderMap(grid, path)
 })
 
 app.use(express.static('public'))
