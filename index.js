@@ -1,4 +1,5 @@
 const findpath = require('./find.js')
+const findpathwd = require('./find-w-diagnols.js')
 const express = require('express')
 const cookieParser = require('cookie-parser')
 
@@ -70,32 +71,32 @@ function renderMap(omap, path) {
   for (let i = 0; i < path.length; i++) {
     if (path[i] === "down") {
       row += 1;
-      nmap[row][col] = "rasta";
+      nmap[row][col] = "path";
     } else if (path[i] === "up") {
       row -= 1;
-      nmap[row][col] = "rasta";
+      nmap[row][col] = "path";
     } else if (path[i] === "right") {
       col += 1;
-      nmap[row][col] = "rasta";
+      nmap[row][col] = "path";
     } else if (path[i] === "left") {
       col -= 1;
-      nmap[row][col] = "rasta";
+      nmap[row][col] = "path";
     } else if (path[i] === "down-right") {
       row += 1;
       col += 1;
-      nmap[row][col] = "rasta";
+      nmap[row][col] = "path";
     } else if (path[i] === "up-left") {
       row -= 1;
       col -= 1;
-      nmap[row][col] = "rasta";
+      nmap[row][col] = "path";
     } else if (path[i] === "down-left") {
       row += 1;
       col -= 1;
-      nmap[row][col] = "rasta";
+      nmap[row][col] = "path";
     } else if (path[i] === "up-right") {
       row -= 1;
       col += 1;
-      nmap[row][col] = "rasta";
+      nmap[row][col] = "path";
     }
   }
   return nmap;
@@ -109,7 +110,7 @@ app.get("/resources", (req, res) => {
   res.sendFile(__dirname + '/public/resourcelist.html')
 })
 
-app.post('/solve', (req, res) => {
+app.post('/solve', async (req, res) => {
   if (req.signedCookies.user == undefined) {
     res.redirect('/login')
     return;
@@ -124,9 +125,15 @@ app.post('/solve', (req, res) => {
     return result
   }, [])
 
-  var path = findpath(grid)
-  var map = renderMap(grid, path)
-  res.send(map)
+  var path;
+  console.log(req.query.w)
+  if (req.query.w == 'd') {
+    path = await findpathwd(grid)
+  } else {
+    path = await findpath(grid)
+  }
+  var map = await renderMap(grid, path)
+  res.send({ path, map })
 })
 
 app.use(express.static('public'))
