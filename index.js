@@ -1,5 +1,4 @@
 const findpath = require('./find.js')
-const findpathwd = require('./find-w-diagnols.js')
 const express = require('express')
 const cookieParser = require('cookie-parser')
 
@@ -117,7 +116,7 @@ app.post('/solve', async (req, res) => {
   }
   var grid = req.body.grid
   var grid = grid.reduce((result, value, index, array) => {
-    const chunkIndex = Math.floor(index / 8)
+    const chunkIndex = Math.floor(index / req.body.width)
     if (!result[chunkIndex]) {
       result[chunkIndex] = []
     }
@@ -125,13 +124,8 @@ app.post('/solve', async (req, res) => {
     return result
   }, [])
 
-  var path;
-  console.log(req.query.w)
-  if (req.query.w == 'd') {
-    path = await findpathwd(grid)
-  } else {
-    path = await findpath(grid)
-  }
+  var path = await findpath(grid)
+  if (!path) return res.send({ path: null, map: null })
   var map = await renderMap(grid, path)
   res.send({ path, map })
 })

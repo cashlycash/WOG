@@ -1,4 +1,4 @@
-function result(map) {
+function finalFunc(map) {
   function find_path(map) {
     let start = null;
     for (let row = 0; row < map.length; row++) {
@@ -24,6 +24,11 @@ function result(map) {
     let row = parseInt(start[0].toString());
     let col = parseInt(start[1].toString());
 
+    // console.log("start", start);
+    // console.log("end", end);
+
+    // console.log(`row: ${row}, col: ${col}`);
+
     findPaths(map, path, start, row, col, end);
   }
 
@@ -42,6 +47,18 @@ function result(map) {
         row += 1;
       } else if (map[row - 1][col] === "e") {
         row -= 1;
+      } else if (map[row + 1][col + 1] === "e") {
+        row += 1;
+        col += 1;
+      } else if (map[row - 1][col - 1] === "e") {
+        row -= 1;
+        col -= 1;
+      } else if (map[row + 1][col - 1] === "e") {
+        row += 1;
+        col -= 1;
+      } else if (map[row - 1][col + 1] === "e") {
+        row -= 1;
+        col += 1;
       }
     } catch (error) {
       // handle exception
@@ -49,10 +66,6 @@ function result(map) {
 
     // check win
     if (row === end[0] && col === end[1]) {
-      console.log("win");
-      if (paths.map((path) => path.join(",")).includes(path.join(","))) {
-        return;
-      }
       paths.push(path);
       return;
     }
@@ -73,117 +86,279 @@ function result(map) {
       } else if (path[i] === "left") {
         tracingcol -= 1;
         coveredBlocks.push(`${tracingrow},${tracingcol}`);
+      } else if (path[i] === "down-right") {
+        tracingrow += 1;
+        tracingcol += 1;
+        coveredBlocks.push(`${tracingrow},${tracingcol}`);
+      } else if (path[i] === "up-left") {
+        tracingrow -= 1;
+        tracingcol -= 1;
+        coveredBlocks.push(`${tracingrow},${tracingcol}`);
+      } else if (path[i] === "down-left") {
+        tracingrow += 1;
+        tracingcol -= 1;
+        coveredBlocks.push(`${tracingrow},${tracingcol}`);
+      } else if (path[i] === "up-right") {
+        tracingrow -= 1;
+        tracingcol += 1;
+        coveredBlocks.push(`${tracingrow},${tracingcol}`);
       }
     }
 
     let possiblePaths = [];
 
-    console.log(path);
-    // calculate x and y distance from end for all adjacent cells
-    let distances = [];
+    function checkDeadEnd(row, col) {
+      if (
+        (map.length - 1 >= row + 1 &&
+          map[row + 1][col] === " " &&
+          !coveredBlocks.includes([row + 1, col].join(","))) ||
+        (0 <= row - 1 &&
+          map[row - 1][col] === " " &&
+          !coveredBlocks.includes([row - 1, col].join(","))) ||
+        (0 <= col - 1 &&
+          map[row][col - 1] === " " &&
+          !coveredBlocks.includes([row, col - 1].join(","))) ||
+        (map[row].length - 1 >= col + 1 &&
+          map[row][col + 1] === " " &&
+          !coveredBlocks.includes([row, col + 1].join(","))) ||
+        (map.length - 1 >= row + 1 &&
+          map[row].length - 1 >= col + 1 &&
+          map[row + 1][col + 1] === " " &&
+          !coveredBlocks.includes([row + 1, col + 1].join(","))) ||
+        (0 <= row - 1 &&
+          0 <= col - 1 &&
+          map[row - 1][col - 1] === " " &&
+          !coveredBlocks.includes([row - 1, col - 1].join(","))) ||
+        (map.length - 1 >= row + 1 &&
+          0 <= col - 1 &&
+          map[row + 1][col - 1] === " " &&
+          !coveredBlocks.includes([row + 1, col - 1].join(","))) ||
+        (0 <= row - 1 &&
+          map[row].length - 1 >= col + 1 &&
+          map[row - 1][col + 1] === " " &&
+          !coveredBlocks.includes([row - 1, col + 1].join(",")))
+      ) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+
     if (
-      row + 1 <= map.length - 1 &&
-      map.length - 1 >= row + 1 &&
+      row < end[0] &&
+      col < end[1] &&
+      map.length >= row + 1 &&
+      map[row].length >= col + 1 &&
+      map[row + 1][col + 1] === " " &&
+      !coveredBlocks.includes([row + 1, col + 1].join(",")) 
+    ) {
+      let newpath = [...path];
+      newpath.push("down-right");
+      possiblePaths.push([newpath, row + 1, col + 1]);
+    }
+    if (
+      row > end[0] &&
+      col > end[1] &&
+      map.length >= row - 1 &&
+      map[row].length >= col - 1 &&
+      map[row - 1][col - 1] === " " &&
+      !coveredBlocks.includes([row - 1, col - 1].join(","))
+    ) {
+      let newpath = [...path];
+      newpath.push("up-left");
+      possiblePaths.push([newpath, row - 1, col - 1]);
+    } 
+    if (
+      row < end[0] &&
+      col > end[1] &&
+      map.length >= row + 1 &&
+      map[row].length >= col - 1 &&
+      map[row + 1][col - 1] === " " &&
+      !coveredBlocks.includes([row + 1, col - 1].join(","))
+    ) {
+      let newpath = [...path];
+      newpath.push("down-left");
+      possiblePaths.push([newpath, row + 1, col - 1]);
+    }
+    if (
+      row > end[0] &&
+      col < end[1] &&
+      map.length >= row - 1 &&
+      map[row].length >= col + 1 &&
+      map[row - 1][col + 1] === " " &&
+      !coveredBlocks.includes([row - 1, col + 1].join(","))
+    ) {
+      let newpath = [...path];
+      newpath.push("up-right");
+      possiblePaths.push([newpath, row - 1, col + 1]);
+    }
+    if (
+      row < end[0] &&
+      map.length >= row + 1 &&
       map[row + 1][col] === " " &&
       !coveredBlocks.includes([row + 1, col].join(","))
     ) {
-      distances.push([end[0], end[1], [row + 1, col, "down"]]);
+      let newpath = [...path];
+      newpath.push("down");
+      possiblePaths.push([newpath, row + 1, col]);
     }
     if (
-      row - 1 >= 0 &&
-      map.length - 1 >= row - 1 &&
+      row > end[0] &&
+      map.length >= row - 1 &&
       map[row - 1][col] === " " &&
       !coveredBlocks.includes([row - 1, col].join(","))
     ) {
-      distances.push([end[0], end[1], [row - 1, col, "up"]]);
-    }
-    console.log(`Conditions for left`)
-    console.log(col - 1 >= 0)
-    if (
-      col - 1 >= 0 &&
-      map[row].length - 1 >= col - 1 &&
-      map[row][col - 1] === " " &&
-      !coveredBlocks.includes([row, col - 1].join(","))
-    ) {
-      console.log(`pushed`)
-      distances.push([end[0], end[1], [row, col - 1, "left"]]);
+      let newpath = [...path];
+      newpath.push("up");
+      possiblePaths.push([newpath, row - 1, col]);
     }
     if (
-      col + 1 <= map[row].length - 1 &&
-      map[row].length - 1 >= col + 1 &&
+      col < end[1] &&
+      map[row].length >= col + 1 &&
       map[row][col + 1] === " " &&
       !coveredBlocks.includes([row, col + 1].join(","))
     ) {
-      distances.push([end[0], end[1], [row, col + 1, "right"]]);
+      let newpath = [...path];
+      newpath.push("right");
+      possiblePaths.push([newpath, row, col + 1]);
+    }
+    if (
+      col > end[1] &&
+      map[row].length >= col - 1 &&
+      map[row][col - 1] === " " &&
+      !coveredBlocks.includes([row, col - 1].join(","))
+    ) {
+      let newpath = [...path];
+      newpath.push("left");
+      possiblePaths.push([newpath, row, col - 1]);
     }
 
-    console.log(distances)
+    possiblePaths.map((path) => {
+      if (checkDeadEnd(path[1], path[2])) {
+        possiblePaths.splice(possiblePaths.indexOf(path), 1);
+      }
+    });
 
-    // find the shortest distance
-    if (distances.length === 0) {
-      console.log("dead end")
-      return;
-    }
+    if (possiblePaths.length === 0) {
+      // calculate x and y distance from end for all adjacent cells
+      let distances = [];
+      if (
+        map.length - 1 >= row + 1 &&
+        map[row + 1][col] === " " &&
+        !coveredBlocks.includes([row + 1, col].join(","))
+      ) {
+        distances.push([
+          Math.abs(row + 1 - end[0]),
+          Math.abs(col - end[1]),
+          [row + 1, col, "down"],
+        ]);
+      }
+      if (
+        0 <= row - 1 &&
+        map[row - 1][col] === " " &&
+        !coveredBlocks.includes([row - 1, col].join(","))
+      ) {
+        distances.push([
+          Math.abs(row - 1 - end[0]),
+          Math.abs(col - end[1]),
+          [row - 1, col, "up"],
+        ]);
+      }
+      if (
+        0 <= col - 1 &&
+        map[row][col - 1] === " " &&
+        !coveredBlocks.includes([row, col - 1].join(","))
+      ) {
+        distances.push([
+          Math.abs(row - end[0]),
+          Math.abs(col - 1 - end[1]),
+          [row, col - 1, "left"],
+        ]);
+      }
+      if (
+        map[row].length - 1 >= col + 1 &&
+        map[row][col + 1] === " " &&
+        !coveredBlocks.includes([row, col + 1].join(","))
+      ) {
+        distances.push([
+          Math.abs(row - end[0]),
+          Math.abs(col + 1 - end[1]),
+          [row, col + 1, "right"],
+        ]);
+      }
+      if (
+        map.length - 1 >= row + 1 &&
+        map[row].length - 1 >= col + 1 &&
+        map[row + 1][col + 1] === " " &&
+        !coveredBlocks.includes([row + 1, col + 1].join(","))
+      ) {
+        distances.push([
+          Math.abs(row + 1 - end[0]),
+          Math.abs(col + 1 - end[1]),
+          [row + 1, col + 1, "down-right"],
+        ]);
+      }
+      if (
+        0 <= row - 1 &&
+        0 <= col - 1 &&
+        map[row - 1][col - 1] === " " &&
+        !coveredBlocks.includes([row - 1, col - 1].join(","))
+      ) {
+        distances.push([
+          Math.abs(row - 1 - end[0]),
+          Math.abs(col - 1 - end[1]),
+          [row - 1, col - 1, "up-left"],
+        ]);
+      }
+      if (
+        map.length - 1 >= row + 1 &&
+        0 <= col - 1 &&
+        map[row + 1][col - 1] === " " &&
+        !coveredBlocks.includes([row + 1, col - 1].join(","))
+      ) {
+        distances.push([
+          Math.abs(row + 1 - end[0]),
+          Math.abs(col - 1 - end[1]),
+          [row + 1, col - 1, "down-left"],
+        ]);
+      }
+      if (
+        0 <= row - 1 &&
+        map[row].length - 1 >= col + 1 &&
+        map[row - 1][col + 1] === " " &&
+        !coveredBlocks.includes([row - 1, col + 1].join(","))
+      ) {
+        distances.push([
+          Math.abs(row - 1 - end[0]),
+          Math.abs(col + 1 - end[1]),
+          [row - 1, col + 1, "up-right"],
+        ]);
+      }
 
-    function getShortestDistance(distances) {
+      // find the shortest distance
+      if (distances.length === 0) {
+        return;
+      }
+
       let finalValues = [];
       for (let i = 0; i < distances.length; i++) {
-        var pointa = [distances[i][0], distances[i][1]];
-        var pointb = [distances[i][2][0], distances[i][2][1]];
-        var mutualDist = Math.sqrt(
-          Math.pow(pointa[0] - pointb[0], 2) +
-            Math.pow(pointa[1] - pointb[1], 2)
-        );
-        finalValues.push([mutualDist, distances[i][2]]);
+        finalValues.push([distances[i][0] / distances[i][1], distances[i][2]]);
       }
+
       if (finalValues.length > 0) finalValues.sort((a, b) => a[0] - b[0]);
-      var shortestDistance = finalValues[0];
+      let shortestDistance = finalValues;
 
-      console.log(shortestDistance)
-
-      // check incase shortest distance is a dead end
-      var cordX = shortestDistance[1][0];
-      var cordY = shortestDistance[1][1];
-      const checkDedMap = [...map];
-
-      // fill the used path with a character
-      coveredBlocks.forEach((block) => {
-        checkDedMap[block.split(",")[0]][block.split(",")[1]] = "x";
-      });
-
-      // check all adjacent cells for the end
-      console.log(cordX, cordY);
-      if (
-        !(
-          (map.length - 1 >= cordX + 1 && map[cordX + 1][cordY] === " ") ||
-          (cordX - 1 >= 0 && map[cordX - 1][cordY] === " ") ||
-          (map[cordX].length - 1 >= cordY + 1 && map[cordX][cordY + 1] === " ") ||
-          (cordY - 1 >= 0 && map[cordX][cordY - 1] === " ") 
-        )
-      ) {
-        var fakeDistIndex = distances.indexOf(
-          distances.find((dist) => dist[2] === shortestDistance[1])
-        );
-        console.log(distances.splice(fakeDistIndex, 1))
-        shortestDistance = getShortestDistance(
-          distances.splice(fakeDistIndex, 1)
-        );
-      }
-
-      return shortestDistance;
+      let newpath = [...path];
+      newpath.push(shortestDistance[0][1][2]);
+      possiblePaths.push([
+        newpath,
+        shortestDistance[0][1][0],
+        shortestDistance[0][1][1],
+      ]);
     }
 
-    let shortestDistance = getShortestDistance(distances);
-
-    let newpath = [...path];
-    newpath.push(shortestDistance[1][2]);
-    possiblePaths.push([
-      newpath,
-      shortestDistance[1][0],
-      shortestDistance[1][1],
-    ]);
-
     // if there are multiple paths, check which one is the shortest
+    // console.log(possiblePaths);
     for (let i = 0; i < possiblePaths.length; i++) {
       findPaths(
         map,
@@ -197,18 +372,92 @@ function result(map) {
 
     // check win
     if (row === end[0] && col === end[1]) {
-      console.log("win");
-      if (paths.map((path) => path.join(",")).includes(path.join(","))) {
-        return;
-      }
       paths.push(path);
     }
   }
 
   find_path(map);
   paths.sort((a, b) => a.length - b.length);
-  console.log(`Final return`)
+  if (paths[0]){
+  paths[0].map((path , i) => {
+    if (path === "down" && paths[0][i + 1] === "right") {
+      paths[0].splice(i, 2, "down-right");
+    }
+    if (path === "down" && paths[0][i + 1] === "left") {
+      paths[0].splice(i, 2, "down-left");
+    }
+    if (path === "up" && paths[0][i + 1] === "right") {
+      paths[0].splice(i, 2, "up-right");
+    }
+    if (path === "up" && paths[0][i + 1] === "left") {
+      paths[0].splice(i, 2, "up-left");
+    }
+  })
+  }
   return paths[0];
 }
 
-module.exports = result;
+module.exports = finalFunc;
+
+function microRender(map, sol) {
+  const nmap = [...map];
+  var start = null;
+  for (let row = 0; row < nmap.length; row++) {
+    nmap[row] = [...nmap[row]];
+    for (let col = 0; col < nmap[row].length; col++) {
+      if (nmap[row][col] === "s") {
+        start = [row, col];
+      }
+    }
+  }
+
+  var row = start[0];
+  var col = start[1];
+
+  for (let i = 0; i < sol.length; i++) {
+    if (sol[i] === "down") {
+      row += 1;
+      nmap[row][col] = "🔽";
+    } else if (sol[i] === "up") {
+      row -= 1;
+      nmap[row][col] = "🔼";
+    } else if (sol[i] === "right") {
+      col += 1;
+      nmap[row][col] = "▶ ";
+    } else if (sol[i] === "left") {
+      col -= 1;
+      nmap[row][col] = " ◀";
+    } else if (sol[i] === "down-right") {
+      row += 1;
+      col += 1;
+      nmap[row][col] = "↘";
+    } else if (sol[i] === "up-left") {
+      row -= 1;
+      col -= 1;
+      nmap[row][col] = "↖";
+    } else if (sol[i] === "down-left") {
+      row += 1;
+      col -= 1;
+      nmap[row][col] = "↙";
+    } else if (sol[i] === "up-right") {
+      row -= 1;
+      col += 1;
+      nmap[row][col] = "↗";
+    }
+  }
+
+  for (let row = 0; row < nmap.length; row++) {
+    for (let col = 0; col < nmap[row].length; col++) {
+      if (nmap[row][col] === "1") {
+        nmap[row][col] = "⬛";
+      } else if (nmap[row][col] === " ") {
+        nmap[row][col] = "  ";
+      }
+    }
+  }
+
+  console.log("-".repeat(16));
+  for (let row = 0; row < nmap.length; row++) {
+    console.log(nmap[row].join(""));
+  }
+}

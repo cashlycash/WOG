@@ -6,6 +6,8 @@ document.body.onmouseup = function () {
   mouseDown = false;
 };
 
+var width = 16
+
 for (div of document.getElementsByTagName("div")) {
   div.addEventListener("mouseover", function (e) {
     if (mouseDown) {
@@ -62,7 +64,7 @@ function clearBoard() {
   }
 }
 
-async function solve(d) {
+async function solve() {
   var start = document.getElementsByClassName("start")[0];
   var end = document.getElementsByClassName("end")[0];
   if (start == undefined) {
@@ -86,13 +88,14 @@ async function solve(d) {
     }
   }
   var { map, path } = await (
-    await fetch("/solve" + (d ? "?w=d" : ""), {
+    await fetch("/solve", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         grid: grid,
+        width
       }),
     })
   ).json();
@@ -166,7 +169,7 @@ async function solve(d) {
 
     paths.forEach((path, index) => {
       setTimeout(() => {
-        var div = document.getElementsByTagName("div")[path[0] * 8 + path[1]];
+        var div = document.getElementsByTagName("div")[path[0] * width + path[1]];
         div.classList.add("rasta");
       }, index * 500);
     });
