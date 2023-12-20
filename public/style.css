@@ -106,6 +106,7 @@ container > section > div {
   height: 50px;
   background-color: #fff;
   margin: 2px;
+  transition: all 1s ease;
 }
 
 button {
