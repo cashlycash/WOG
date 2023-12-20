@@ -42,6 +42,18 @@ function result(map) {
         row += 1;
       } else if (map[row - 1][col] === "e") {
         row -= 1;
+      } else if (map[row + 1][col + 1] === "e") {
+        row += 1;
+        col += 1;
+      } else if (map[row - 1][col - 1] === "e") {
+        row -= 1;
+        col -= 1;
+      } else if (map[row + 1][col - 1] === "e") {
+        row += 1;
+        col -= 1;
+      } else if (map[row - 1][col + 1] === "e") {
+        row -= 1;
+        col += 1;
       }
     } catch (error) {
       // handle exception
@@ -73,6 +85,22 @@ function result(map) {
       } else if (path[i] === "left") {
         tracingcol -= 1;
         coveredBlocks.push(`${tracingrow},${tracingcol}`);
+      } else if (path[i] === "down-right") {
+        tracingrow += 1;
+        tracingcol += 1;
+        coveredBlocks.push(`${tracingrow},${tracingcol}`);
+      } else if (path[i] === "up-left") {
+        tracingrow -= 1;
+        tracingcol -= 1;
+        coveredBlocks.push(`${tracingrow},${tracingcol}`);
+      } else if (path[i] === "down-left") {
+        tracingrow += 1;
+        tracingcol -= 1;
+        coveredBlocks.push(`${tracingrow},${tracingcol}`);
+      } else if (path[i] === "up-right") {
+        tracingrow -= 1;
+        tracingcol += 1;
+        coveredBlocks.push(`${tracingrow},${tracingcol}`);
       }
     }
 
@@ -97,31 +125,65 @@ function result(map) {
     ) {
       distances.push([end[0], end[1], [row - 1, col, "up"]]);
     }
-    console.log(`Conditions for left`)
-    console.log(col - 1 >= 0)
     if (
-      col - 1 >= 0 &&
+      col + 1 <= map[row].length - 1 &&
       map[row].length - 1 >= col - 1 &&
       map[row][col - 1] === " " &&
       !coveredBlocks.includes([row, col - 1].join(","))
     ) {
-      console.log(`pushed`)
       distances.push([end[0], end[1], [row, col - 1, "left"]]);
     }
     if (
-      col + 1 <= map[row].length - 1 &&
+      col - 1 >= 0 &&
       map[row].length - 1 >= col + 1 &&
       map[row][col + 1] === " " &&
       !coveredBlocks.includes([row, col + 1].join(","))
     ) {
       distances.push([end[0], end[1], [row, col + 1, "right"]]);
     }
-
-    console.log(distances)
+    if (
+      col + 1 <= map[row].length - 1 &&
+      row + 1 <= map.length - 1 &&
+      map.length - 1 >= row + 1 &&
+      map[row].length - 1 >= col + 1 &&
+      map[row + 1][col + 1] === " " &&
+      !coveredBlocks.includes([row + 1, col + 1].join(","))
+    ) {
+      distances.push([end[0], end[1], [row + 1, col + 1, "down-right"]]);
+    }
+    if (
+      col - 1 >= 0 &&
+      row - 1 >= 0 &&
+      map.length - 1 >= row - 1 &&
+      map[row].length - 1 >= col - 1 &&
+      map[row - 1][col - 1] === " " &&
+      !coveredBlocks.includes([row - 1, col - 1].join(","))
+    ) {
+      distances.push([end[0], end[1], [row - 1, col - 1, "up-left"]]);
+    }
+    if (
+      col - 1 >= 0 &&
+      row + 1 <= map.length - 1 &&
+      map.length - 1 >= row + 1 &&
+      map[row].length - 1 >= col - 1 &&
+      map[row + 1][col - 1] === " " &&
+      !coveredBlocks.includes([row + 1, col - 1].join(","))
+    ) {
+      distances.push([end[0], end[1], [row + 1, col - 1, "down-left"]]);
+    }
+    if (
+      col + 1 <= map[row].length - 1 &&
+      row - 1 >= 0 &&
+      map.length - 1 >= row - 1 &&
+      map[row].length - 1 >= col + 1 &&
+      map[row - 1][col + 1] === " " &&
+      !coveredBlocks.includes([row - 1, col + 1].join(","))
+    ) {
+      distances.push([end[0], end[1], [row - 1, col + 1, "up-right"]]);
+    }
 
     // find the shortest distance
     if (distances.length === 0) {
-      console.log("dead end")
       return;
     }
 
@@ -138,8 +200,6 @@ function result(map) {
       }
       if (finalValues.length > 0) finalValues.sort((a, b) => a[0] - b[0]);
       var shortestDistance = finalValues[0];
-
-      console.log(shortestDistance)
 
       // check incase shortest distance is a dead end
       var cordX = shortestDistance[1][0];
@@ -158,7 +218,19 @@ function result(map) {
           (map.length - 1 >= cordX + 1 && map[cordX + 1][cordY] === " ") ||
           (cordX - 1 >= 0 && map[cordX - 1][cordY] === " ") ||
           (map[cordX].length - 1 >= cordY + 1 && map[cordX][cordY + 1] === " ") ||
-          (cordY - 1 >= 0 && map[cordX][cordY - 1] === " ") 
+          (cordY - 1 >= 0 && map[cordX][cordY - 1] === " ") ||
+          (map.length - 1 >= cordX + 1 &&
+            map[cordX].length - 1 >= cordY + 1 &&
+            map[cordX + 1][cordY + 1] === " ") ||
+          (cordX - 1 >= 0 &&
+            cordY - 1 >= 0 &&
+            map[cordX - 1][cordY - 1] === " ") ||
+          (map.length - 1 >= cordX + 1 &&
+            cordY - 1 >= 0 &&
+            map[cordX + 1][cordY - 1] === " ") ||
+          (cordX - 1 >= 0 &&
+            map[cordX].length - 1 >= cordY + 1 &&
+            map[cordX - 1][cordY + 1] === " ")
         )
       ) {
         var fakeDistIndex = distances.indexOf(
@@ -197,7 +269,6 @@ function result(map) {
 
     // check win
     if (row === end[0] && col === end[1]) {
-      console.log("win");
       if (paths.map((path) => path.join(",")).includes(path.join(","))) {
         return;
       }
@@ -207,7 +278,6 @@ function result(map) {
 
   find_path(map);
   paths.sort((a, b) => a.length - b.length);
-  console.log(`Final return`)
   return paths[0];
 }
 
